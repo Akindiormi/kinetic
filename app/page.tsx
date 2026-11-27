@@ -25,7 +25,7 @@ export default function HomePage() {
           <nav className="hidden items-center gap-8 text-sm font-semibold md:flex">
             <a href="#classes">Classes</a><a href="#coaching">Coaching</a><a href="#approach">Our approach</a>
           </nav>
-          <Link href="#contact" className="pill bg-[#161616] px-6 py-3 text-sm font-bold text-white">LET’S TALK <ArrowUpRight className="ml-2 inline" size={15} /></Link>
+          <div className="flex items-center gap-3"><Link href="/login" className="hidden rounded-full px-4 py-3 text-xs font-bold text-[#161616] transition hover:bg-black/5 sm:inline-flex">SIGN IN</Link><Link href="/register" className="pill bg-[#161616] px-5 py-3 text-xs font-bold text-white">JOIN KINETIC <ArrowUpRight className="ml-2 inline" size={15} /></Link></div>
         </div>
       </header>
 
