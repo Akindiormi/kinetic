@@ -59,7 +59,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     <div className="w-full max-w-[460px]">
       <Link href="/" className="display-font text-2xl font-black tracking-[-.09em]">KINETIC<span className="text-[#ee7640]">.</span></Link>
       <p className="section-label mt-16 text-[#ee7640]">{isRegister ? "START YOUR JOURNEY" : "WELCOME BACK"}</p>
-      <h1 className="display-font mt-4 text-4xl font-black leading-[1.05] tracking-[-.07em] md:text-5xl">{isRegister ? "MAKE YOUR<br />MOVE." : "GOOD TO<br />SEE YOU."}</h1>
+      <h1 className="display-font mt-4 text-4xl font-black leading-[1.05] tracking-[-.07em] md:text-5xl">{isRegister ? <>MAKE YOUR<br />MOVE.</> : <>GOOD TO<br />SEE YOU.</>}</h1>
       <p className="mt-5 text-sm leading-6 text-black/55">{isRegister ? "Create an account to keep your fitness experience connected." : "Sign in to continue to your KINETIC space."}</p>
 
       <form onSubmit={handleSubmit} className="mt-9 space-y-4">
