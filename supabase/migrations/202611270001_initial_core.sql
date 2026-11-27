@@ -228,8 +228,12 @@ as $$
   );
 $$;
 
+alter table public.locations enable row level security;
 alter table public.profiles enable row level security;
 alter table public.role_assignments enable row level security;
+alter table public.coach_profiles enable row level security;
+alter table public.membership_plans enable row level security;
+alter table public.waitlist_entries enable row level security;
 alter table public.member_preferences enable row level security;
 alter table public.memberships enable row level security;
 alter table public.payments enable row level security;
@@ -244,14 +248,10 @@ alter table public.staff_tasks enable row level security;
 alter table public.consents enable row level security;
 alter table public.audit_log enable row level security;
 
-create policy "profiles_select_self_or_management" on public.profiles
-for select using (
-  id = auth.uid()
-  or exists (
-    select 1 from public.role_assignments ra
-    where ra.user_id = auth.uid() and ra.role in ('reception','staff','management','owner')
-  )
-);
+create policy "locations_active_read" on public.locations
+for select using (is_active = true or public.has_location_role(id, array['management','owner','reception','staff']));
+create policy "profiles_select_self_only" on public.profiles
+for select using (id = auth.uid());
 create policy "profiles_update_self" on public.profiles
 for update using (id = auth.uid()) with check (id = auth.uid());
 
@@ -304,10 +304,20 @@ create policy "policies_owner_manage" on public.policy_settings
 for all to authenticated using (public.has_location_role(location_id, array['owner']))
 with check (public.has_location_role(location_id, array['owner']));
 
+create policy "active_plans_public_read" on public.membership_plans
+for select using (is_active = true or public.has_location_role(location_id, array['management','owner','reception']));
+create policy "public_coach_profiles_read" on public.coach_profiles
+for select using (is_public = true or user_id = auth.uid());
 create policy "active_classes_public_read" on public.classes
 for select using (is_active = true or public.has_location_role(location_id, array['management','owner','reception','staff']));
-create policy "sessions_read_authenticated" on public.class_sessions
-for select to authenticated using (true);
+create policy "sessions_public_schedule_read" on public.class_sessions
+for select using (
+  exists (select 1 from public.classes c where c.id = class_id and c.is_active = true)
+  or exists (
+    select 1 from public.classes c
+    where c.id = class_id and public.has_location_role(c.location_id, array['management','owner','reception','staff','trainer'])
+  )
+);
 create policy "bookings_self_or_staff_read" on public.bookings
 for select using (
   user_id = auth.uid()
@@ -320,6 +330,16 @@ create policy "bookings_self_insert" on public.bookings
 for insert with check (user_id = auth.uid());
 create policy "bookings_self_update" on public.bookings
 for update using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy "waitlist_self_or_staff_read" on public.waitlist_entries
+for select using (
+  user_id = auth.uid()
+  or exists (
+    select 1 from public.class_sessions s join public.classes c on c.id = s.class_id
+    where s.id = session_id and public.has_location_role(c.location_id, array['reception','management','owner','trainer'])
+  )
+);
+create policy "waitlist_self_insert" on public.waitlist_entries
+for insert with check (user_id = auth.uid());
 
 create policy "tasks_staff_read" on public.staff_tasks
 for select using (public.has_location_role(location_id, array['reception','staff','management','owner']));
