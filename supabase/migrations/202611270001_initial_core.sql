@@ -31,7 +31,7 @@ create table if not exists public.role_assignments (
   location_id uuid references public.locations(id) on delete cascade,
   role text not null check (role in ('member','trainer','reception','staff','management','owner')),
   created_at timestamptz not null default now(),
-  unique (user_id, location_id, role)
+  unique nulls not distinct (user_id, location_id, role)
 );
 
 create table if not exists public.gym_settings (
