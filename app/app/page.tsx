@@ -9,6 +9,11 @@ export default async function MemberHomePage() {
   if (error || !user) redirect("/login");
 
   const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+  const { data: roleRows } = await supabase.from("role_assignments").select("role").eq("user_id", user.id);
+  const roles = (roleRows ?? []).map((row) => row.role as string);
+  if (roles.includes("owner") || roles.includes("management")) redirect("/app/management");
+  if (roles.some((role) => ["trainer", "reception", "staff"].includes(role))) redirect("/app/staff");
+
   const displayName = profile?.full_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "there";
 
   async function signOut() {
